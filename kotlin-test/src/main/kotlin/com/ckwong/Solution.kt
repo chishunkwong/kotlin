@@ -1,6 +1,9 @@
 package com.ckwong
 
 class Solution {
+
+    // trivial change
+    
     fun isValidSudoku(board: Array<CharArray>): Boolean {
         val indices = 0..8
         val rows = indices.map { board[it].toList() }
