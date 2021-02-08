@@ -1,5 +1,6 @@
 package com.ckwong
 
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.floor
 import kotlin.math.sqrt
 
@@ -72,23 +73,51 @@ class Solution {
         return head
     }
 
-    fun myPow(x: Double, n: Int): Double {
+    /**
+     * Calculate x^y by taking the square root of y, then recurse.
+     * At first glance this may seem like the right solution, as it quickly
+     * reduce the size of the power, but it actually ends up calling itelf more
+     * times than if we just half y, then multiply by x one more time if y is odd.
+     */
+    fun myPowByRoot(x: Double, n: Int, counter: AtomicInteger): Double {
+        counter.incrementAndGet()
         // stupid min value edge case
         if (n == Int.MIN_VALUE) {
-            return 1 / (myPow(x, Int.MAX_VALUE) * x)
+            return 1 / (myPowByRoot(x, Int.MAX_VALUE, counter) * x)
         }
         if (n == 0) return 1.0
-        if (n < 0) return 1 / myPow(x, -n)
+        if (n < 0) return 1 / myPowByRoot(x, -n, counter)
         if (n == 1) return x
         // The next two are optional really, should make it slightly faster
         if (n == 2) return x * x
         if (n == 3) return x * x * x
         val root = floor(sqrt(n.toDouble())).toInt()
-        val rootPow = myPow(x, root)
+        val rootPow = myPowByRoot(x, root, counter)
         return if (root * root == n) {
-            myPow(rootPow, root)
+            myPowByRoot(rootPow, root, counter)
         } else {
-            myPow(rootPow, root) * myPow(x, n - root * root)
+            myPowByRoot(rootPow, root, counter) * myPowByRoot(x, n - root * root, counter)
+        }
+    }
+
+    /**
+     * Calculate x^y by taking half of y, then recuse. See similar function above for comparison
+     */
+    fun myPowByDivide(x: Double, n: Int, counter: AtomicInteger): Double {
+        counter.incrementAndGet()
+        // stupid min value edge case
+        if (n == Int.MIN_VALUE) {
+            return 1 / (myPowByDivide(x, Int.MAX_VALUE, counter) * x)
+        }
+        if (n == 0) return 1.0
+        if (n < 0) return 1 / myPowByDivide(x, -n, counter)
+        if (n == 1) return x
+        val half = n / 2
+        val halfPow = myPowByDivide(x, half, counter)
+        return if (half * 2 == n) {
+            halfPow * halfPow
+        } else {
+            halfPow * halfPow * x
         }
     }
 
@@ -96,7 +125,8 @@ class Solution {
         @JvmStatic
         fun main(args: Array<String>) {
             val sol = Solution()
-            println(sol.myPow(2.0, 10))
+            val counter = AtomicInteger(0)
+            println("${sol.myPowByDivide(2.0, 25, counter)}, ${counter.get()}")
             /*
             val five = ListNode(5)
             val four = ListNode(4, five)
