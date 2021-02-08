@@ -1,5 +1,8 @@
 package com.ckwong
 
+import kotlin.math.floor
+import kotlin.math.sqrt
+
 class Solution {
 
     fun isValidSudoku(board: Array<CharArray>): Boolean {
@@ -69,17 +72,39 @@ class Solution {
         return head
     }
 
+    fun myPow(x: Double, n: Int): Double {
+        // stupid min value edge case
+        if (n == Int.MIN_VALUE) {
+            return 1 / (myPow(x, Int.MAX_VALUE) * x)
+        }
+        if (n == 0) return 1.0
+        if (n < 0) return 1 / myPow(x, -n)
+        if (n == 1) return x
+        // The next two are optional really, should make it slightly faster
+        if (n == 2) return x * x
+        if (n == 3) return x * x * x
+        val root = floor(sqrt(n.toDouble())).toInt()
+        val rootPow = myPow(x, root)
+        return if (root * root == n) {
+            myPow(rootPow, root)
+        } else {
+            myPow(rootPow, root) * myPow(x, n - root * root)
+        }
+    }
+
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
+            val sol = Solution()
+            println(sol.myPow(2.0, 10))
+            /*
             val five = ListNode(5)
             val four = ListNode(4, five)
             val three = ListNode(3, four)
             val two = ListNode(2, three)
             val one = ListNode(1, two)
-            println(Solution().removeNthFromEnd(one, 2))
-            /*
-            println("answer: ${Solution().isValidSudoku(
+            println(sol.removeNthFromEnd(one, 2))
+            println("answer: ${sol.isValidSudoku(
                 listOf(
                     charArrayOf('5', '3', '.', '.', '7', '.', '.', '.', '.'),
                     charArrayOf('6', '.', '.', '1', '9', '5', '.', '.', '.'),
