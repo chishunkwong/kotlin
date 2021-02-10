@@ -121,13 +121,74 @@ class Solution {
         }
     }
 
+    /**
+     * Swap an array of 0s, 1s and 2s in-place.
+     * I didn't know it but it is a well-known algo called Dutch National flag algorithm
+     */
+    fun sortColors(nums: IntArray): Unit {
+        var lastZero: Int? = null
+        var firstTwo: Int? = null
+        val len = nums.size
+        nums.forEachIndexed { index, value ->
+            if (value == 0) {
+                lastZero = swapZero(nums, index, lastZero)
+            } else if (value == 2) {
+                var firstNonTwoBackwards: Int? = null
+                var i = firstTwo?.let { firstTwo!! - 1 } ?: (len - 1)
+                while (firstNonTwoBackwards == null && i > index) {
+                    if (nums[i] < 2) {
+                        firstNonTwoBackwards = i
+                    } else {
+                        i--
+                    }
+                }
+                if (firstNonTwoBackwards == null) {
+                    return
+                }
+                firstTwo = firstNonTwoBackwards
+                nums[index] = nums[firstTwo!!]
+                // if it is a 0, move it further up, because we will not revisit this (index is only going up once)
+                if (nums[index] == 0) {
+                    lastZero = swapZero(nums, index, lastZero)
+                }
+                nums[firstTwo!!] = 2
+            }
+            // else are 1s, and they will fall in place as long as we take care of the 0s and 2s
+        }
+    }
+
+    fun swapZero(nums: IntArray, index: Int, lastZeroVal: Int?): Int {
+        var lastZero = lastZeroVal
+        // nums[index] is expected to be 0
+        var firstNonZeroForwards: Int? = null
+        var i = lastZero?.let { lastZero!! + 1 } ?: 0
+        while (firstNonZeroForwards == null && i < index) {
+            if (nums[i] > 0) {
+                firstNonZeroForwards = i
+            } else {
+                i++
+            }
+        }
+        if (firstNonZeroForwards == null) {
+            lastZero = index
+        } else {
+            lastZero = firstNonZeroForwards
+            nums[index] = nums[lastZero!!]
+            nums[lastZero!!] = 0
+        }
+        return lastZero
+    }
+
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
             val sol = Solution()
             val counter = AtomicInteger(0)
-            println("${sol.myPowByDivide(2.0, 25, counter)}, ${counter.get()}")
             /*
+            val arr = intArrayOf(0, 2, 1, 2, 0, 1, 2, 2, 2, 1, 2, 0)
+            sol.sortColors(arr)
+            println(arr.toList())
+            println("${sol.myPowByDivide(2.0, 25, counter)}, ${counter.get()}")
             val five = ListNode(5)
             val four = ListNode(4, five)
             val three = ListNode(3, four)
