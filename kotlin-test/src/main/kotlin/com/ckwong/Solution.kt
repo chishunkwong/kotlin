@@ -157,7 +157,7 @@ class Solution {
         }
     }
 
-    fun swapZero(nums: IntArray, index: Int, lastZeroVal: Int?): Int {
+    private fun swapZero(nums: IntArray, index: Int, lastZeroVal: Int?): Int {
         var lastZero = lastZeroVal
         // nums[index] is expected to be 0
         var firstNonZeroForwards: Int? = null
@@ -179,11 +179,62 @@ class Solution {
         return lastZero
     }
 
+    /**
+     * Given a "board" of Xs and Os, flip all "trapped" Os to Xs.
+     * An O is trapped if it has no connecting Os that can get it to an edge
+     */
+    fun solve(board: Array<CharArray>): Unit {
+        val m = board.size
+        if (m == 0) return
+        val n = board[0].size
+        if (n == 0) return
+        val oh = 'O'
+        val ex = 'X'
+        val justX = CharArray(n)
+        (0 until n).forEach { justX[it] = ex }
+        val justXStr = String(justX)
+        val tracker = Array(m) { _ -> justXStr.toCharArray() }
+        // the top and bottom edges, including the corners
+        listOf(0, m - 1).forEach { row ->
+            board[row].forEachIndexed { col, char ->
+                if (char == oh) {
+                    tracker[row][col] = oh
+                    findNeighbor(board, row, col, tracker)
+                }
+            }
+        }
+        // the two sides, excluding the corners
+        if (m > 2) {
+            (1 .. m-2).forEach{ row ->
+                listOf(0, n-1).forEach { col->
+                    if (board[row][col] == oh) {
+                        tracker[row][col] = oh
+                        findNeighbor(board, row, col, tracker)
+                    }
+                }
+            }
+        }
+    }
+
+    // find neighbors that are Os, and mark them as safe using the provided tracker, if they are not already marked
+    private fun findNeighbor(board: Array<CharArray>, x: Int, y: Int, tracker: Array<CharArray>) {
+        println("($x, $y)")
+        // TBC
+    }
+
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
             val sol = Solution()
             val counter = AtomicInteger(0)
+            val board = listOf(
+                "XXOX",
+                "OOXX",
+                "XXOX",
+                "XXXO"
+            ).map { it.toCharArray() }.toTypedArray()
+            sol.solve(board)
+            board.toList().forEach { println(String(it)) }
             /*
             val arr = intArrayOf(0, 2, 1, 2, 0, 1, 2, 2, 2, 1, 2, 0)
             sol.sortColors(arr)
