@@ -199,27 +199,56 @@ class Solution {
             board[row].forEachIndexed { col, char ->
                 if (char == oh) {
                     tracker[row][col] = oh
-                    findNeighbor(board, row, col, tracker)
+                    findNeighbor(board, m, n, row, col, tracker)
                 }
             }
         }
         // the two sides, excluding the corners
         if (m > 2) {
-            (1 .. m-2).forEach{ row ->
-                listOf(0, n-1).forEach { col->
+            (1..m - 2).forEach { row ->
+                listOf(0, n - 1).forEach { col ->
                     if (board[row][col] == oh) {
                         tracker[row][col] = oh
-                        findNeighbor(board, row, col, tracker)
+                        findNeighbor(board, m, n, row, col, tracker)
                     }
+                }
+            }
+        }
+        // at this point tracker has all the safe Os marked, so just flip everything else to X
+        (0 until m).forEach { row ->
+            (0 until n).forEach { col ->
+                if (tracker[row][col] != oh) {
+                    board[row][col] = ex
                 }
             }
         }
     }
 
     // find neighbors that are Os, and mark them as safe using the provided tracker, if they are not already marked
-    private fun findNeighbor(board: Array<CharArray>, x: Int, y: Int, tracker: Array<CharArray>) {
-        println("($x, $y)")
-        // TBC
+    private fun findNeighbor(board: Array<CharArray>, m: Int, n: Int, row: Int, col: Int, tracker: Array<CharArray>) {
+        val oh = 'O'
+        fun markSave(row: Int, col: Int) {
+            if (board[row][col] == oh && tracker[row][col] != oh) {
+                tracker[row][col] = oh
+                findNeighbor(board, m, n, row, col, tracker)
+            }
+        }
+        // top
+        if (col > 0) {
+            markSave(row, col - 1)
+        }
+        // bottom
+        if (col < n - 1) {
+            markSave(row, col + 1)
+        }
+        // left
+        if (row > 0) {
+            markSave(row - 1, col)
+        }
+        // right
+        if (row < m - 1) {
+            markSave(row + 1, col)
+        }
     }
 
     companion object {
