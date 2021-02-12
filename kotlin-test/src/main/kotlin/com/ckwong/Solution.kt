@@ -233,19 +233,19 @@ class Solution {
                 findNeighbor(board, m, n, row, col, tracker)
             }
         }
-        // top
+        // left
         if (col > 0) {
             markSave(row, col - 1)
         }
-        // bottom
+        // right
         if (col < n - 1) {
             markSave(row, col + 1)
         }
-        // left
+        // above
         if (row > 0) {
             markSave(row - 1, col)
         }
-        // right
+        // below
         if (row < m - 1) {
             markSave(row + 1, col)
         }
