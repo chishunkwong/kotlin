@@ -1,5 +1,6 @@
 package com.ckwong
 
+import java.lang.IllegalArgumentException
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.floor
 import kotlin.math.sqrt
@@ -251,11 +252,123 @@ class Solution {
         }
     }
 
+    /**
+     * A basic calculator that takes only non-negative integers and + - * /
+     * No parenthesis
+     * This solution is far from optimal, the best answers all walk the string one character at a time
+     * and just multiply by 10 if a number is encountered, and if +/- is encountered, it does accordingly,
+     * but if * / is encountered, then it modifies the running argument, until we get to the next +/- or
+     * if we get to the end
+     */
+    fun calculate(s: String): Int {
+        // The Int in 'second' is the sign, 1 for plus and -1 for minus
+        val plusOrMinus = mutableListOf<Pair<String, Int>>()
+        var next = 0
+        var rest = s
+        var sign = 0
+        do {
+            val plus = rest.indexOf('+')
+            val minus = rest.indexOf('-')
+            if (plus > 0 && (minus < 0 || plus < minus)) {
+                next = plus
+                sign = 1
+            } else if (minus > 0 && (plus < 0 || minus < plus)) {
+                next = minus
+                sign = -1
+            } else {
+                sign = 0
+            }
+            if (sign != 0) {
+                plusOrMinus.add(Pair(rest.substring(0, next), sign))
+                rest = rest.substring(next + 1)
+            }
+        } while (sign != 0)
+        // the last chunk, plus or minus don't matter
+        plusOrMinus.add(Pair(rest, 1))
+        var answer = 0
+        fun handleMultiplyDivide(s: String): Int {
+            try {
+                val i = s.trim().toInt()
+                return i
+            } catch (e: Exception) {
+                // fine, moving on
+            }
+            val multiply = s.lastIndexOf('*')
+            val divide = s.lastIndexOf('/')
+            when {
+                (multiply <= 0 || multiply < divide) -> {
+                    val sub = handleMultiplyDivide(s.substring(0, divide)) /
+                            handleMultiplyDivide(s.substring(divide + 1))
+                    // println("$s = $sub")
+                    return sub
+                }
+                (divide <= 0 || multiply > divide) -> {
+                    val sub = handleMultiplyDivide(s.substring(0, multiply)) *
+                            handleMultiplyDivide(s.substring(multiply + 1))
+                    // println("$s = $sub")
+                    return sub
+                }
+            }
+            throw IllegalArgumentException(s)
+        }
+
+        var lastPlusOrMinus = 1
+        plusOrMinus.forEach {
+            answer = answer + lastPlusOrMinus * handleMultiplyDivide(it.first)
+            lastPlusOrMinus = it.second
+        }
+        return answer
+    }
+
+    /**
+     * Same as above, but this one is more recursive and failed the submission because of memory
+     */
+    fun calculate2(s: String): Int {
+        try {
+            val i = s.trim().toInt()
+            return i
+        } catch (e: Exception) {
+            // fine, moving on
+        }
+        s.indexOf('+').let {
+            if (it > 0) {
+                val sub = calculate(s.substring(0, it)) + calculate(s.substring(it + 1))
+                println("$s = $sub")
+                return sub
+            }
+        }
+        s.lastIndexOf('-').let {
+            if (it > 0) {
+                val sub = calculate(s.substring(0, it)) - calculate(s.substring(it + 1))
+                println("$s = $sub")
+                return sub
+            }
+        }
+        val multiply = s.lastIndexOf('*')
+        val divide = s.lastIndexOf('/')
+        when {
+            (multiply <= 0 || multiply < divide) -> {
+                val sub = calculate(s.substring(0, divide)) / calculate(s.substring(divide + 1))
+                println("$s = $sub")
+                return sub
+            }
+            (divide <= 0 || multiply > divide) -> {
+                val sub = calculate(s.substring(0, multiply)) * calculate(s.substring(multiply + 1))
+                println("$s = $sub")
+                return sub
+            }
+        }
+        throw IllegalArgumentException(s)
+    }
+
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
             val sol = Solution()
             val counter = AtomicInteger(0)
+            println(sol.calculate("2 + 3 - 5 + 6 * 8 / 9 - 2"))
+            println(sol.calculate("1-1-1"))
+            /*
             val board = listOf(
                 "XXOX",
                 "OOXX",
@@ -264,7 +377,6 @@ class Solution {
             ).map { it.toCharArray() }.toTypedArray()
             sol.solve(board)
             board.toList().forEach { println(String(it)) }
-            /*
             val arr = intArrayOf(0, 2, 1, 2, 0, 1, 2, 2, 2, 1, 2, 0)
             sol.sortColors(arr)
             println(arr.toList())
