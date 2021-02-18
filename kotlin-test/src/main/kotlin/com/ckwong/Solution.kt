@@ -361,14 +361,85 @@ class Solution {
         throw IllegalArgumentException(s)
     }
 
+    /**
+     * Change a given linked list to odd even: {1,2,3,4,5} -> {1,3,5,2,4}
+     */
+    fun oddEvenList(head: ListNode?): ListNode? {
+        if (head?.next == null) return head
+        val second = head.next
+        var curOdd = head
+        var curEven = second
+        while (curOdd != null && curEven != null) {
+            // thisOdd->thisEven->nextOdd->nextEven
+            val thisOdd = curOdd!!
+            val thisEven = curEven!!
+            val nextOdd = thisEven.next
+            val nextEven = nextOdd?.next
+            // println("=== ${thisOdd.`val`}, ${thisEven.`val`}")
+            if (nextOdd != null) {
+                thisOdd.next = nextOdd
+                if (nextEven != null) {
+                    thisEven.next = nextEven
+                    curOdd = nextOdd
+                    curEven = nextEven
+                    // println("${nextOdd.`val`}, ${nextEven.`val`}")
+                } else {
+                    // we stopped at nextOdd
+                    nextOdd.next = second
+                    curEven.next = null
+                    curEven = null
+                }
+            } else {
+                // we stopped at thisEven
+                thisOdd.next = second
+                curEven.next = null
+                curOdd = null
+            }
+        }
+        return head
+    }
+
+    /**
+     * Given an array of integers of length n + 1 consisting of numbers in [1 .. n], where each number in the array
+     * appears at most once, except one, which may appear two or more times. Find that one repeating number.
+     */
+    fun findDuplicate(nums: IntArray): Int {
+        /*
+         three solutions, each one will violate at least one constraint stated in the problem description
+         1. sort, then walk, this will either require extra memory space or modify the array
+         2. create a map of seen numbers and counts, this will require extra memory space
+         3. nested loops, checks nums[i] == nums[j] where i != j, this will require O(n^2)
+         */
+        /* simple solution, but wrong, because it assumes all numbers appear
+        val len = nums.size - 1
+        return nums.sum() - (1 + len) * len / 2
+         */
+        val sorted = nums.sortedArray()
+        var lastNum = 0
+        sorted.forEach {
+            if (it == lastNum) {
+                return it
+            }
+            lastNum = it
+        }
+        return 0
+    }
+
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
             val sol = Solution()
             val counter = AtomicInteger(0)
+            val five = ListNode(5)
+            val four = ListNode(4, five)
+            val three = ListNode(3, four)
+            val two = ListNode(2, three)
+            val one = ListNode(1, two)
+            println(sol.findDuplicate(intArrayOf(1, 2, 2, 2, 3)))
+            /*
+            println(sol.oddEvenList(one))
             println(sol.calculate("2 + 3 - 5 + 6 * 8 / 9 - 2"))
             println(sol.calculate("1-1-1"))
-            /*
             val board = listOf(
                 "XXOX",
                 "OOXX",
@@ -381,11 +452,6 @@ class Solution {
             sol.sortColors(arr)
             println(arr.toList())
             println("${sol.myPowByDivide(2.0, 25, counter)}, ${counter.get()}")
-            val five = ListNode(5)
-            val four = ListNode(4, five)
-            val three = ListNode(3, four)
-            val two = ListNode(2, three)
-            val one = ListNode(1, two)
             println(sol.removeNthFromEnd(one, 2))
             println("answer: ${sol.isValidSudoku(
                 listOf(
