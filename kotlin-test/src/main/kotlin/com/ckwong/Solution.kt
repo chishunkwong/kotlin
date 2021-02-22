@@ -402,6 +402,10 @@ class Solution {
     /**
      * Given an array of integers of length n + 1 consisting of numbers in [1 .. n], where each number in the array
      * appears at most once, except one, which may appear two or more times. Find that one repeating number.
+     * This works, but the best solution from LeetCode was to modify the array (temporarily) and set a number to -1
+     * times it if a number of that index is seen, so if it is seen a second time then we know.
+     * For example [5, 3, 2, 2, 1] would have set 3 to -3 on the first 2 and then the second 2 will see the -3 and know.
+     * Before returning we can switch all negative numbers back to positive.
      */
     fun findDuplicate(nums: IntArray): Int {
         /*
@@ -425,18 +429,68 @@ class Solution {
         return 0
     }
 
+    fun solveNQueens(n: Int): List<List<String>> {
+        val answers = mutableListOf<List<Int>>()
+        (0 until n).forEach {
+            val result = addNumber(mutableListOf(), it, n)
+            if (result != null) answers.add(result)
+        }
+        val stringAnswers = answers.map {
+            it.map { rowQ ->
+                String((0 until n).map { index ->
+                    when {
+                        index == rowQ -> 'Q'
+                        else -> '.'
+                    }
+                }.toCharArray())
+            }
+        }
+        stringAnswers.forEach {
+            it.forEach { row -> println(row) }
+            println("")
+        }
+        println("${stringAnswers.size} number of boards")
+        return stringAnswers
+    }
+
+    private fun addNumber(candidate: List<Int>, num: Int, n: Int): List<Int>? {
+        // the board is filled and so we have a winner
+        if (candidate.size == n) return candidate
+        (0 until n).forEach {
+            // check if this number can be added up to this point
+            // (i.e. whether a new row with a queen at index num can be added)
+            val len = candidate.size
+            candidate.forEachIndexed { index, atIndex ->
+                // check the vertical
+                if (num == atIndex) return null
+                // check the +1 diagonal (NE-SW)
+                if (num + (len - index) == atIndex) return null
+                // check the -1 diagonal (NW-SE)
+                if (num - (len - index) == atIndex) return null
+            }
+            // the horizontal is given, because we are about to add it and nothing was there before we do,
+            // so at this point num is good, so we add it and then go one level deeper
+            val newCandidate = candidate.toMutableList()
+            newCandidate.add(num)
+            val result = addNumber(newCandidate, it, n)
+            if (result != null) return result
+        }
+        return null
+    }
+
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
             val sol = Solution()
             val counter = AtomicInteger(0)
+            sol.solveNQueens(5)
+            /*
             val five = ListNode(5)
             val four = ListNode(4, five)
             val three = ListNode(3, four)
             val two = ListNode(2, three)
             val one = ListNode(1, two)
             println(sol.findDuplicate(intArrayOf(1, 2, 2, 2, 3)))
-            /*
             println(sol.oddEvenList(one))
             println(sol.calculate("2 + 3 - 5 + 6 * 8 / 9 - 2"))
             println(sol.calculate("1-1-1"))
