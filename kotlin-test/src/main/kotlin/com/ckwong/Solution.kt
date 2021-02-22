@@ -429,11 +429,14 @@ class Solution {
         return 0
     }
 
+    /**
+     * Given a chess board of n x n size, find all boards that can fit n queens on it
+     * without having any pair of queens that can "take" each other
+     */
     fun solveNQueens(n: Int): List<List<String>> {
         val answers = mutableListOf<List<Int>>()
         (0 until n).forEach {
-            val result = addNumber(mutableListOf(), it, n)
-            if (result != null) answers.add(result)
+            addNumber(mutableListOf(), it, n, answers)
         }
         val stringAnswers = answers.map {
             it.map { rowQ ->
@@ -453,29 +456,42 @@ class Solution {
         return stringAnswers
     }
 
-    private fun addNumber(candidate: List<Int>, num: Int, n: Int): List<Int>? {
-        // the board is filled and so we have a winner
-        if (candidate.size == n) return candidate
-        (0 until n).forEach {
-            // check if this number can be added up to this point
-            // (i.e. whether a new row with a queen at index num can be added)
-            val len = candidate.size
-            candidate.forEachIndexed { index, atIndex ->
-                // check the vertical
-                if (num == atIndex) return null
-                // check the +1 diagonal (NE-SW)
-                if (num + (len - index) == atIndex) return null
-                // check the -1 diagonal (NW-SE)
-                if (num - (len - index) == atIndex) return null
-            }
-            // the horizontal is given, because we are about to add it and nothing was there before we do,
-            // so at this point num is good, so we add it and then go one level deeper
-            val newCandidate = candidate.toMutableList()
-            newCandidate.add(num)
-            val result = addNumber(newCandidate, it, n)
-            if (result != null) return result
+    /**
+     * A board is abstracted to a list of n integers from 0 to n-1, the 0th index is the first row, and so on.
+     * The value at a particular index is the column where the queen is on that row. Obviously each row will
+     * have one and only one queen on it, so we build up the board one row at a time, fanning out to cover all
+     * possibilities. The big-O should be n^n, so more than n!, we could make it n! if we skip all the indices
+     * that already has a queen on it before we fan out, but that itself takes time too, so not sure if it is
+     * actually faster.
+     */
+    private fun addNumber(candidate: List<Int>, num: Int, n: Int, answers: MutableList<List<Int>>) {
+        // check if this number can be added up to this point
+        // (i.e. whether a new row with a queen at index num can be added)
+        val len = candidate.size
+        candidate.forEachIndexed { index, atIndex ->
+            // check the vertical
+            if (num == atIndex) return
+            // check the +1 diagonal (NE-SW)
+            if (num + (len - index) == atIndex) return
+            // check the -1 diagonal (NW-SE)
+            if (num - (len - index) == atIndex) return
         }
-        return null
+        // the horizontal is given, because we are about to add it and nothing was there before we do,
+        // so at this point num is good, so we add it and then go one level deeper
+        val newCandidate = candidate.toMutableList()
+        newCandidate.add(num)
+        // the board is filled and so we have a winner
+        if (newCandidate.size == n) {
+            answers.add(newCandidate)
+        } else {
+            // otherwise, add the next row
+            // Here, instead of 0 until n we could skip all the numbers that are already in newCandidate, like this,
+            // ((0 until n).toSet() subtract newCandidate.toSet()).forEach {
+            // but LeetCode, on making this change, resulted in a slower run (but that is not reliable, I know)
+            (0 until n).forEach {
+                addNumber(newCandidate, it, n, answers)
+            }
+        }
     }
 
     companion object {
@@ -483,7 +499,7 @@ class Solution {
         fun main(args: Array<String>) {
             val sol = Solution()
             val counter = AtomicInteger(0)
-            sol.solveNQueens(5)
+            sol.solveNQueens(8)
             /*
             val five = ListNode(5)
             val four = ListNode(4, five)
