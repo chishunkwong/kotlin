@@ -47,7 +47,8 @@ class LinesInPlaneSolution {
         }
         val answer = lines.values.map {
             // solve the quadratic equation n(n+1) = distinct points duplicate count,
-            // because each unique pair of distinct points contributed to one line twice
+            // because each distinct point contributed to the line n times,
+            // once with each of the other point on the line
             val dupCount = (round(sqrt(4 * it.second.get() + 1.0)).toInt() - 1) / 2
             // multiply by 2 because the occurrence counts are also doubled
             it.first.get() / (2 * dupCount)
