@@ -22,7 +22,7 @@ class NestedInteger {
     // @return the single integer that this NestedInteger holds, if it holds a single integer
     // Return null if this NestedInteger holds a nested list
     fun getInteger(): Int? {
-        return 0
+        return i
     }
 
     // Set this NestedInteger to hold a single integer.
