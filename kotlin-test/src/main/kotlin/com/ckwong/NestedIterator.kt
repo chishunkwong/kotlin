@@ -1,77 +1,55 @@
 package com.ckwong
 
+import java.lang.IllegalArgumentException
 import java.util.Deque
 import java.util.LinkedList
 
-class NestedIterator(val nestedList: List<NestedInteger>) {
-
-    var listIndex = 0
+class NestedIterator(nestedList: List<NestedInteger>) {
+    val nl = nestedList
+    // which nested integer is up next
+    var listIndex = -1
+    // the current nested integer, already flattened
     // the nested lists, the last one is the one we get the next value from
-    var nested: Deque<NestedInteger> = LinkedList()
-    // the indices for getting to the nested lists above, the last value if the index of the next value
-    var pointers: Deque<Int> = LinkedList()
-    var nextInt: Int? = 0
+    var flattened: Deque<Int>? = null
 
     init {
-        nextInt = nextInternal()
-    }
-
-    private fun nextInternal(): Int? {
-        if (nestedList.size <= listIndex) return null
-        val i = nextInNestedInteger()
-        return if (i == null) {
-            listIndex++
-            nested = LinkedList()
-            pointers = LinkedList()
-            if (nestedList.size <= listIndex) {
-                null
-            } else {
-                nextInNestedInteger()
-            }
-        } else {
-            i
-        }
-    }
-
-    private fun nextInNestedInteger(): Int? {
-        val ni = if (nested.isEmpty()) {
-            // start from the top
-            nestedList[listIndex]
-        } else {
-            nested.last()
-        }
-        return if (ni.isInteger()) {
-            advancePointers()
-            ni.getInteger()
-        } else {
-            val ni2 = ni.getList()!![pointers.last()]
-            if (ni2.isInteger()) {
-                advancePointers()
-                ni2.getInteger()
-            } else {
-                pointers.push(0)
-                nested.push(ni2)
-                nextInNestedInteger()
-            }
-        }
-    }
-
-    private fun advancePointers() {
-        val lastNi = nested.last()
-        if (lastNi == null) {
-
-        }
+        getNextFlattened()
     }
 
     fun next(): Int {
-        val answer = nextInt!!
-        // proactively get the next one
-        nextInt = nextInternal()
+        if (flattened == null)
+            throw IllegalArgumentException("No next element")
+        val nextNi = flattened!!
+        val answer = nextNi.removeFirst()
+        if (nextNi.isEmpty()) {
+            getNextFlattened()
+        }
         return answer
     }
 
+    private fun getNextFlattened() {
+        while ((flattened == null || flattened!!.isEmpty()) && ++listIndex < nl.size) {
+            flattened = flatten(nl[listIndex])
+        }
+        if (flattened != null && flattened.isNullOrEmpty()) {
+            flattened = null
+        }
+    }
+
     fun hasNext(): Boolean {
-        return nextInt != null
+        return flattened != null
+    }
+
+    private fun flatten(ni: NestedInteger, list: Deque<Int> = LinkedList()): Deque<Int> {
+        if (ni.isInteger()) {
+            list.add(ni.getInteger())
+        } else {
+            val niList = ni.getList()!!
+            niList.forEach {
+                flatten(it, list)
+            }
+        }
+        return list
     }
 
     companion object {
@@ -83,10 +61,12 @@ class NestedIterator(val nestedList: List<NestedInteger>) {
             val five = NestedInteger(5)
             twoThree.add(NestedInteger(2)).add(NestedInteger(3))
             val iter = NestedIterator(listOf(one, twoThree, NestedInteger().add(NestedInteger().add(four)).add(five)))
+            // val iter = NestedIterator(listOf(NestedInteger()))
             var counter = 0
             while (iter.hasNext() && counter++ < 100) {
-                println(iter.next())
+                print("${iter.next()}, ")
             }
+            println("")
         }
     }
 }
