@@ -8,7 +8,7 @@ class TrappingRainWater {
         // infinite loop escape latch
         var counter = 0
         do {
-            val filled = fillLocalMinimas(height)
+            val filled = fillLocalMinima(height)
             // println("$filled, ${height.toList()}")
             total += filled
         } while (filled > 0 && counter++ < 100000)
@@ -20,7 +20,7 @@ class TrappingRainWater {
      * The height array will be modified as the local minima get filled
      * @return the total amount of water filled
      */
-    private fun fillLocalMinimas(height: IntArray): Int {
+    private fun fillLocalMinima(height: IntArray): Int {
         var toLeftIndex: Int? = null
         var toLeftHeight: Int? = null
         var lastHeight = height[0]
