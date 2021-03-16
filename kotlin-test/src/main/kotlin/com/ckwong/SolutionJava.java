@@ -38,6 +38,14 @@ public class SolutionJava {
         return maxOfMaxs;
     }
 
+    /**
+     * collect the area of the base rectangle, then call itself recursively
+     * by chopping the histogram into smaller ones where each has bars that
+     * are taller than the minimum of the passed-in histogram. Visually, it
+     * means draw a horizontal line at the low water mark, then apply the same
+     * logic only to the peaks that are above that horizontal line.
+     * @param maximums a list of candidates that this function will add to
+     */
     private void largestRectangleArea(int[] heights, List<Integer> maximums) {
         final int len = heights.length;
         if (len == 0) return;
@@ -59,14 +67,14 @@ public class SolutionJava {
             if (heights[i] == min) {
                 if (i - lastMinMatch > 1) {
                     // there are some bars above min
-                    maximums.add(largestRectangleArea(Arrays.copyOfRange(heights, lastMinMatch + 1, i)));
+                    largestRectangleArea(Arrays.copyOfRange(heights, lastMinMatch + 1, i), maximums);
                 }
                 lastMinMatch = i;
             }
         }
         if (lastMinMatch < len - 1) {
             // the tail of the heights array that are greater than min
-            maximums.add(largestRectangleArea(Arrays.copyOfRange(heights, lastMinMatch + 1, len)));
+            largestRectangleArea(Arrays.copyOfRange(heights, lastMinMatch + 1, len), maximums);
         }
     }
 
