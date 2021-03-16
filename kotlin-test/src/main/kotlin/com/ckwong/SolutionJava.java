@@ -1,6 +1,8 @@
 package com.ckwong;
 
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 
 public class SolutionJava {
 
@@ -26,12 +28,58 @@ public class SolutionJava {
         return answer;
     }
 
+    public int largestRectangleArea(int[] heights) {
+        List<Integer> maximums = new LinkedList<>();
+        largestRectangleArea(heights, maximums);
+        int maxOfMaxs = 0;
+        for (int m : maximums) {
+            maxOfMaxs = Math.max(m, maxOfMaxs);
+        }
+        return maxOfMaxs;
+    }
+
+    private void largestRectangleArea(int[] heights, List<Integer> maximums) {
+        final int len = heights.length;
+        if (len == 0) return;
+        int min = Integer.MAX_VALUE;
+        int max = 0;
+        for (int h : heights) {
+            min = Math.min(min, h);
+            max = Math.max(max, h);
+        }
+        // the base rectangle
+        maximums.add(min * len);
+        if (min == max) {
+            // we have one single rectangle
+            return;
+        }
+        // split into smaller problems by recursively looking at only the peaks that are above the minimum
+        int lastMinMatch = -1;
+        for (int i = 0; i < len; i++) {
+            if (heights[i] == min) {
+                if (i - lastMinMatch > 1) {
+                    // there are some bars above min
+                    maximums.add(largestRectangleArea(Arrays.copyOfRange(heights, lastMinMatch + 1, i)));
+                }
+                lastMinMatch = i;
+            }
+        }
+        if (lastMinMatch < len - 1) {
+            // the tail of the heights array that are greater than min
+            maximums.add(largestRectangleArea(Arrays.copyOfRange(heights, lastMinMatch + 1, len)));
+        }
+    }
+
     public static void main(String[] args) {
         SolutionJava sol = new SolutionJava();
+        System.out.println(sol.largestRectangleArea(new int[]{2, 1, 5, 6, 2, 3}));
+        // System.out.println(sol.largestRectangleArea(new int[]{9, 0}));
+        /*
         int[] answer = sol.productExceptSelf(new int[]{1, 2, 3, 4});
         for (int i : answer) {
             System.out.print(i + ",");
         }
         System.out.println("");
+        */
     }
 }
