@@ -1,8 +1,6 @@
 package com.ckwong;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class SolutionJava {
 
@@ -78,9 +76,50 @@ public class SolutionJava {
         }
     }
 
+    /**
+     * Given an array of integers nums and an integer k,
+     * return the total number of continuous subarrays whose sum equals to k.
+     * The logic is not mine, just implementing hint 4 of
+     * https://leetcode.com/problems/subarray-sum-equals-k/
+     */
+    public int subarraySum(int[] nums, int k) {
+        final int len = nums.length;
+        if (len == 0) return 0;
+        // at what index(s) does the cumulative sum (0 to that index inclusive) equal to the key (the sum)
+        final Map<Integer, List<Integer>> sumsAtIndices = new HashMap<>();
+        int sum = 0;
+        for (int i=0; i<len; i++) {
+            sum += nums[i];
+            List<Integer> atSum = sumsAtIndices.getOrDefault(sum, new ArrayList<>());
+            atSum.add(i);
+            sumsAtIndices.putIfAbsent(sum, atSum);
+        }
+        // System.out.println(sumsAtIndices);
+        // at each index, find any continuous subarray(s) that sum to k,
+        // use the observation that sum(i..j) = sum(0..j) - sum(0..i-1)
+        int sumToBeforeCur = 0;
+        final List<Integer> empty = new LinkedList<>();
+        int answer = 0;
+        for (int i=0; i<len; i++) {
+            int sumToJ = k + sumToBeforeCur;
+            // System.out.println(sumToJ);
+            // System.out.println(sumsAtIndices.getOrDefault(sumToJ, empty));
+            List<Integer> matchedIndices = sumsAtIndices.getOrDefault(sumToJ, empty);
+            int lessThanI = 0;
+            for (int j : matchedIndices) {
+                // matchedIndices is sorted because of how it was populated, so we can stop once we past i
+                if (j >= i) break;
+                lessThanI++;
+            }
+            answer += matchedIndices.size() - lessThanI;
+            sumToBeforeCur += nums[i];
+        }
+        return answer;
+    }
+
     public static void main(String[] args) {
         SolutionJava sol = new SolutionJava();
-        System.out.println(sol.largestRectangleArea(new int[]{2, 1, 5, 6, 2, 3}));
+        // System.out.println(sol.largestRectangleArea(new int[]{2, 1, 5, 6, 2, 3}));
         // System.out.println(sol.largestRectangleArea(new int[]{9, 0}));
         /*
         int[] answer = sol.productExceptSelf(new int[]{1, 2, 3, 4});
@@ -89,5 +128,7 @@ public class SolutionJava {
         }
         System.out.println("");
         */
+        System.out.println(sol.subarraySum(new int[]{1, 2, 3}, 3));
+        // System.out.println(sol.subarraySum(new int[]{-1, -1, 1}, 0));
     }
 }
