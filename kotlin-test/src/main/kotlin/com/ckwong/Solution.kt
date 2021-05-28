@@ -494,13 +494,60 @@ class Solution {
         }
     }
 
+    fun compareVersion(version1: String, version2: String): Int {
+        val len1 = version1.length
+        val len2 = version2.length
+        var next1: Int = 0
+        var next2: Int = 0
+        var dot1: Int = -1
+        var dot2: Int = -1
+        do {
+            next1 = if (dot1 != len1) {
+                val newDot1 = version1.indexOf('.', dot1 + 1)
+                val temp = dot1
+                val ver = if (newDot1 > 0) {
+                    dot1 = newDot1
+                    version1.substring(temp + 1, newDot1).toInt()
+                } else {
+                    dot1 = len1
+                    version1.substring(temp + 1).toInt()
+                }
+                ver
+            } else {
+                0
+            }
+            next2 = if (dot2 != len2) {
+                val newDot2 = version2.indexOf('.', dot2 + 1)
+                val temp = dot2
+                val ver = if (newDot2 > 0) {
+                    dot2 = newDot2
+                    version2.substring(temp + 1, newDot2).toInt()
+                } else {
+                    dot2 = len2
+                    version2.substring(temp + 1).toInt()
+                }
+                ver
+            } else {
+                0
+            }
+            // println("$next1, $next2")
+            if (next1 > next2) {
+                return 1
+            } else if (next1 < next2){
+                return -1
+            } // else the version at this stage is the same
+        } while (dot1 != len1 || dot2 != len2)
+        return 0
+    }
+
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
             val sol = Solution()
+            println(sol.compareVersion("1.01.0.00", "1.1"))
+            /*
             val counter = AtomicInteger(0)
             sol.solveNQueens(8)
-            /*
             val five = ListNode(5)
             val four = ListNode(4, five)
             val three = ListNode(3, four)
