@@ -2,7 +2,9 @@ package com.ckwong
 
 import java.lang.IllegalArgumentException
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.math.abs
 import kotlin.math.floor
+import kotlin.math.min
 import kotlin.math.sqrt
 
 class Solution {
@@ -589,10 +591,134 @@ class Solution {
         }
     }
 
+    /**
+     * Given an integer array nums and two integers k and t, return true if there are two distinct indices i and j
+     * in the array such that abs(nums[i] - nums[j]) <= t and abs(i - j) <= k.
+     */
+    fun containsNearbyAlmostDuplicate(nums: IntArray, k: Int, t: Int): Boolean {
+        val kPlus1 = k + 1
+        val kConsec = ArrayList<Int>()
+        var next = 0
+        (0 until min(kPlus1, nums.size)).forEach {
+            next = it
+            if (insertInto(nums[it], kConsec, t)) return true
+        }
+        (next + 1 until nums.size).forEach {
+            println("$it, $kPlus1")
+            removeFrom(nums[it - kPlus1], kConsec)
+            if (insertInto(nums[it], kConsec, t)) return true
+        }
+        return false
+    }
+
+    /**
+     * Given a sorted array list of integers and a target, remove the target from the list.
+     * Do nothing if target not found
+     */
+    private fun removeFrom(target: Int, kConsec: ArrayList<Int>) {
+        // First find the index using binary search
+        // println("remove $target $kConsec")
+        var start: Int = 0
+        var end = kConsec.size - 1 // inclusive
+        while (end - start > 1) {
+            val mid = (start + end) / 2
+            // println("$start, $end")
+            val atMid = kConsec[mid]
+            when {
+                target > atMid -> {
+                    start = mid
+                }
+                target < atMid -> {
+                    end = mid
+                }
+                else -> {
+                    kConsec.removeAt(mid)
+                    return
+                }
+            }
+        }
+        if (target == kConsec[start]) {
+            kConsec.removeAt(start)
+        } else if (target == kConsec[end]) {
+            kConsec.removeAt(end)
+        }
+    }
+
+    /**
+     * Insert an integer into a sorted list. However, if in the process of finding the right place to insert
+     * we found a number in the list that is within t from the to-be-inserted number, we simply true, without
+     * further processing. I.e. not even the insertion. This is a purpose-built function for the
+     * containsNearbyAlmostDuplicate problem.
+     * If no close-enough number is found, then the insertion is done and false is returned
+     */
+    private fun insertInto(toInsert: Int, kConsec: ArrayList<Int>, t: Int): Boolean {
+        // println("$toInsert, $kConsec")
+        if (kConsec.isEmpty()) {
+            // initial case
+            kConsec.add(toInsert)
+            return false
+        }
+        var start: Int = 0
+        var end = kConsec.size - 1 // inclusive
+        var atStart = kConsec[start]
+        var atEnd = kConsec[end]
+        if (abs(toInsert - atStart) <= t || abs(toInsert - atEnd) <= t) {
+            // println("return 1 $toInsert $atStart $atEnd")
+            return true
+        }
+        if (toInsert < atStart) {
+            kConsec.add(start, toInsert)
+            return false
+        }
+        if (toInsert > atEnd) {
+            kConsec.add(toInsert)
+            return false
+        }
+        while (end - start > 1) {
+            val mid = (start + end) / 2
+            val atMid = kConsec[mid]
+            if (abs(toInsert - atMid) <= t) {
+                // println("return 2 $toInsert $atMid $mid")
+                return true
+            }
+            when {
+                toInsert > atMid -> {
+                    start = mid
+                }
+                toInsert < atMid -> {
+                    end = mid
+                }
+                else -> {
+                    // We found one that matches exactly, so return true (inserting is moot at this point)
+                    // Actually this will never happen because we would have returned true earlier
+                    return true
+                }
+            }
+        }
+        atStart = kConsec[start]
+        atEnd = kConsec[end]
+        if (abs(toInsert - atStart) <= t || abs(toInsert - atEnd) <= t) {
+            // println("return 4 $toInsert $atStart $atEnd $start $end")
+            return true
+        }
+        if (toInsert < atStart) {
+            kConsec.add(start, toInsert)
+        }
+        if (toInsert > atEnd) {
+            kConsec.add(toInsert)
+        }
+        return false
+    }
+
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
             val sol = Solution()
+            // println(sol.containsNearbyAlmostDuplicate(intArrayOf(1, 2, 3, 1), 3, 0))
+            // println(sol.containsNearbyAlmostDuplicate(intArrayOf(1, 5, 9, 1, 5, 9), 2, 3))
+            // println(sol.containsNearbyAlmostDuplicate(intArrayOf(1, 2, 5, 6, 7, 2, 4), 4, 0))
+            println(sol.containsNearbyAlmostDuplicate(intArrayOf(-2147483648, 2147483647), 1, 1))
+            /*
             println(
                 sol.numIslands(
                     arrayOf(
@@ -603,7 +729,6 @@ class Solution {
                     )
                 )
             )
-            /*
             println(sol.compareVersion("1.01.0.00", "1.1"))
             val counter = AtomicInteger(0)
             sol.solveNQueens(8)
