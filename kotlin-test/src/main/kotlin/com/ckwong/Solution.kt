@@ -533,19 +533,78 @@ class Solution {
             // println("$next1, $next2")
             if (next1 > next2) {
                 return 1
-            } else if (next1 < next2){
+            } else if (next1 < next2) {
                 return -1
             } // else the version at this stage is the same
         } while (dot1 != len1 || dot2 != len2)
         return 0
     }
 
+    fun numIslands(grid: Array<CharArray>): Int {
+        val marked = mutableMapOf<Pair<Int, Int>, Int>()
+        val width = grid[0].size
+        val height = grid.size
+        val numIslands = AtomicInteger(0)
+        grid.forEachIndexed { y, row ->
+            row.forEachIndexed { x, entry ->
+                if (entry == '1') {
+                    markNeighbor(x, y, width, height, grid, null, numIslands, marked)
+                }
+            }
+        }
+        return numIslands.get()
+    }
+
+    private fun markNeighbor(
+        x: Int, y: Int, width: Int, height: Int, grid: Array<CharArray>,
+        num: Int?, numIslands: AtomicInteger, marked: MutableMap<Pair<Int, Int>, Int>
+    ) {
+        val value = grid[y][x]
+        // println("val $value")
+        if (value == '0') {
+            return
+        }
+        val xY = Pair(x, y)
+        if (marked[xY] == null) {
+            val islandNum = num ?: numIslands.incrementAndGet()
+            // println("-- $islandNum")
+            marked[xY] = islandNum
+            // mark our neighbors
+            if (x > 0) {
+                // left
+                markNeighbor(x - 1, y, width, height, grid, islandNum, numIslands, marked)
+            }
+            if (x < width - 1) {
+                // right
+                markNeighbor(x + 1, y, width, height, grid, islandNum, numIslands, marked)
+            }
+            if (y > 0) {
+                // above
+                markNeighbor(x, y - 1, width, height, grid, islandNum, numIslands, marked)
+            }
+            if (y < height - 1) {
+                // below
+                markNeighbor(x, y + 1, width, height, grid, islandNum, numIslands, marked)
+            }
+        }
+    }
+
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
             val sol = Solution()
-            println(sol.compareVersion("1.01.0.00", "1.1"))
+            println(
+                sol.numIslands(
+                    arrayOf(
+                        charArrayOf('1', '1', '0', '0', '0'),
+                        charArrayOf('1', '1', '0', '0', '0'),
+                        charArrayOf('0', '0', '1', '0', '0'),
+                        charArrayOf('0', '0', '0', '1', '1'),
+                    )
+                )
+            )
             /*
+            println(sol.compareVersion("1.01.0.00", "1.1"))
             val counter = AtomicInteger(0)
             sol.solveNQueens(8)
             val five = ListNode(5)
