@@ -701,11 +701,16 @@ class Solution {
             // println("return 4 $toInsert $atStart $atEnd $start $end")
             return true
         }
-        if (toInsert < atStart) {
-            kConsec.add(start, toInsert)
-        }
-        if (toInsert > atEnd) {
-            kConsec.add(toInsert)
+        when {
+            toInsert < atStart -> {
+                kConsec.add(start, toInsert)
+            }
+            toInsert > atEnd -> {
+                kConsec.add(toInsert)
+            }
+            else -> {
+                kConsec.add(end, toInsert)
+            }
         }
         return false
     }
