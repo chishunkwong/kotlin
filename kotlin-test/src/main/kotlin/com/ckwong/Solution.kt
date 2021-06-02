@@ -604,7 +604,7 @@ class Solution {
             if (insertInto(nums[it], kConsec, t)) return true
         }
         (next + 1 until nums.size).forEach {
-            println("$it, $kPlus1")
+            // println("$it, $kPlus1")
             removeFrom(nums[it - kPlus1], kConsec)
             if (insertInto(nums[it], kConsec, t)) return true
         }
@@ -662,12 +662,8 @@ class Solution {
         var end = kConsec.size - 1 // inclusive
         var atStart = kConsec[start]
         var atEnd = kConsec[end]
-        if (!(toInsert < -1 && atStart == Int.MAX_VALUE) &&
-            Int.MIN_VALUE != atStart && Int.MAX_VALUE - atStart - toInsert != 1 && abs(toInsert - atStart) <= t
-            ||
-            !(toInsert < -1 && atEnd == Int.MAX_VALUE) &&
-            Int.MIN_VALUE != atEnd && Int.MAX_VALUE - atEnd - toInsert != 1 && abs(toInsert - atEnd) <= t) {
-            println("return 1 $toInsert $atStart $atEnd")
+        if (abs(toInsert.toLong() - atStart.toLong()) <= t || abs(toInsert.toLong() - atEnd.toLong()) <= t) {
+            // println("return 1 $toInsert $atStart $atEnd")
             return true
         }
         if (toInsert < atStart) {
@@ -681,8 +677,8 @@ class Solution {
         while (end - start > 1) {
             val mid = (start + end) / 2
             val atMid = kConsec[mid]
-            if (abs(toInsert - atMid) <= t) {
-                println("return 2 $toInsert $atMid $mid")
+            if (abs(toInsert.toLong() - atMid.toLong()) <= t) {
+                // println("return 2 $toInsert $atMid $mid")
                 return true
             }
             when {
@@ -701,8 +697,8 @@ class Solution {
         }
         atStart = kConsec[start]
         atEnd = kConsec[end]
-        if (abs(toInsert - atStart) <= t || abs(toInsert - atEnd) <= t) {
-            println("return 4 $toInsert $atStart $atEnd $start $end")
+        if (abs(toInsert.toLong()- atStart.toLong()) <= t || abs(toInsert.toLong() - atEnd.toLong()) <= t) {
+            // println("return 4 $toInsert $atStart $atEnd $start $end")
             return true
         }
         if (toInsert < atStart) {
@@ -721,9 +717,10 @@ class Solution {
             // println(sol.containsNearbyAlmostDuplicate(intArrayOf(1, 2, 3, 1), 3, 0))
             // println(sol.containsNearbyAlmostDuplicate(intArrayOf(1, 5, 9, 1, 5, 9), 2, 3))
             // println(sol.containsNearbyAlmostDuplicate(intArrayOf(1, 2, 5, 6, 7, 2, 4), 4, 0))
-            println(sol.containsNearbyAlmostDuplicate(intArrayOf(2147483647, -2147483648), 1, 2147483647))
-            println(sol.containsNearbyAlmostDuplicate(intArrayOf(-2147483648, 2147483647), 1, 1))
-            println(sol.containsNearbyAlmostDuplicate(intArrayOf(2147483647, -1, 2147483647), 1, 2147483647))
+            // println(sol.containsNearbyAlmostDuplicate(intArrayOf(2147483647, -2147483648), 1, 2147483647))
+            // println(sol.containsNearbyAlmostDuplicate(intArrayOf(-2147483648, 2147483647), 1, 1))
+            // println(sol.containsNearbyAlmostDuplicate(intArrayOf(2147483647, -1, 2147483647), 1, 2147483647))
+            println(sol.containsNearbyAlmostDuplicate(intArrayOf(-2147483648, -2147483647), 3, 3))
             /*
             println(
                 sol.numIslands(
