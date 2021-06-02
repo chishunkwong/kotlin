@@ -79,7 +79,7 @@ class Solution {
     /**
      * Calculate x^y by taking the square root of y, then recurse.
      * At first glance this may seem like the right solution, as it quickly
-     * reduce the size of the power, but it actually ends up calling itelf more
+     * reduce the size of the power, but it actually ends up calling itself more
      * times than if we just half y, then multiply by x one more time if y is odd.
      */
     fun myPowByRoot(x: Double, n: Int, counter: AtomicInteger): Double {
@@ -104,7 +104,7 @@ class Solution {
     }
 
     /**
-     * Calculate x^y by taking half of y, then recuse. See similar function above for comparison
+     * Calculate x^y by taking half of y, then recurse. See similar function above for comparison
      */
     fun myPowByDivide(x: Double, n: Int, counter: AtomicInteger): Double {
         counter.incrementAndGet()
@@ -646,7 +646,7 @@ class Solution {
 
     /**
      * Insert an integer into a sorted list. However, if in the process of finding the right place to insert
-     * we found a number in the list that is within t from the to-be-inserted number, we simply true, without
+     * we found a number in the list that is within t from the to-be-inserted number, we simply return true, without
      * further processing. I.e. not even the insertion. This is a purpose-built function for the
      * containsNearbyAlmostDuplicate problem.
      * If no close-enough number is found, then the insertion is done and false is returned
@@ -697,7 +697,7 @@ class Solution {
         }
         atStart = kConsec[start]
         atEnd = kConsec[end]
-        if (abs(toInsert.toLong()- atStart.toLong()) <= t || abs(toInsert.toLong() - atEnd.toLong()) <= t) {
+        if (abs(toInsert.toLong() - atStart.toLong()) <= t || abs(toInsert.toLong() - atEnd.toLong()) <= t) {
             // println("return 4 $toInsert $atStart $atEnd $start $end")
             return true
         }
@@ -715,18 +715,72 @@ class Solution {
         return false
     }
 
+    /**
+     * Write an efficient algorithm that searches for a target value in an m x n integer matrix.
+     * The matrix has the properties that every row and column are sorted. For example
+     *  1 2
+     *  3 4
+     */
+    fun searchMatrix(matrix: Array<IntArray>, target: Int): Boolean {
+        val width = matrix[0].size
+        val height = matrix.size
+        var rowStart = 0
+        var rowEnd = width - 1 // inclusive
+        var colStart = 0
+        var colEnd = height - 1 // ditto
+        while (rowEnd >= rowStart && colEnd >= colStart) {
+            val atCol = binSearch(colStart, colEnd, target) { x ->
+                matrix[rowStart][x]
+            }
+            if (atCol.first) {
+                // found it in a particular col of row at rowStart
+                return true
+            }
+            rowEnd = atCol.second
+            if (rowEnd < rowStart) return false
+            val atRow = binSearch(rowStart, rowEnd, target) { y ->
+                matrix[y][colStart]
+            }
+            if (atRow.first) {
+                // found it in a particular row of col at colStart
+                return true
+            }
+            colEnd = atRow.second
+            if (colEnd < colStart) return false
+            colStart++
+            colEnd++
+        }
+        return false
+    }
+
+    /**
+     * do a binary search on (a section of) a row or a column of a given matrix to find a target,
+     * return true, index if found
+     * else return false, index, where index is the value just lower than the target,
+     * or -1 if target is smaller than all, and len if target is larger than all
+     */
+    private fun binSearch(start: Int, end: Int, target: Int, accessor: (Int) -> Int): Pair<Boolean, Int> {
+        return Pair(true, 0)
+    }
+
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
             val sol = Solution()
-            // println(sol.containsNearbyAlmostDuplicate(intArrayOf(1, 2, 3, 1), 3, 0))
-            // println(sol.containsNearbyAlmostDuplicate(intArrayOf(1, 5, 9, 1, 5, 9), 2, 3))
-            // println(sol.containsNearbyAlmostDuplicate(intArrayOf(1, 2, 5, 6, 7, 2, 4), 4, 0))
-            // println(sol.containsNearbyAlmostDuplicate(intArrayOf(2147483647, -2147483648), 1, 2147483647))
-            // println(sol.containsNearbyAlmostDuplicate(intArrayOf(-2147483648, 2147483647), 1, 1))
-            // println(sol.containsNearbyAlmostDuplicate(intArrayOf(2147483647, -1, 2147483647), 1, 2147483647))
-            println(sol.containsNearbyAlmostDuplicate(intArrayOf(-2147483648, -2147483647), 3, 3))
+            println(
+                sol.searchMatrix(
+                    arrayOf(
+                        intArrayOf(1, 4, 7, 11, 15),
+                        intArrayOf(2, 5, 8, 12, 19),
+                        intArrayOf(3, 6, 9, 16, 22),
+                        intArrayOf(10, 13, 14, 17, 24),
+                        intArrayOf(18, 21, 23, 26, 30),
+                    ),
+                    5
+                )
+            )
             /*
+            println(sol.containsNearbyAlmostDuplicate(intArrayOf(1, 2, 3, 1), 3, 0))
             println(
                 sol.numIslands(
                     arrayOf(
