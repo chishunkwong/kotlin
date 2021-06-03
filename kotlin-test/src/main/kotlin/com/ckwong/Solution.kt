@@ -791,11 +791,29 @@ class Solution {
         }
     }
 
+    /**
+     * https://leetcode.com/problems/single-number-iii/
+     * This works, but the correct answer involves smart use of xor,
+     * I had in mind an approach using prime numbers (assuming there is a prime number service that gives me the n-th
+     * prime), but that still leaves me with having to do a factorization at the end, which is where the smartness
+     * of the xor solution comes. See for example https://leetcode.com/problems/single-number-iii/discuss/1244592
+     */
+    fun singleNumber(nums: IntArray): IntArray {
+        val tracker = mutableSetOf<Int>()
+        nums.forEach {
+            if (!tracker.remove(it)) {
+                tracker.add(it)
+            }
+        }
+        return tracker.toIntArray()
+    }
+
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
             val sol = Solution()
-            // println(sol.searchMatrix(arrayOf(intArrayOf(1, 1)), 3))
+            println(sol.singleNumber(intArrayOf(1, 2, 3, 2)).toList())
+            /*
             println(
                 sol.searchMatrix(
                     arrayOf(
@@ -808,7 +826,6 @@ class Solution {
                     12
                 )
             )
-            /*
             println(sol.containsNearbyAlmostDuplicate(intArrayOf(1, 2, 3, 1), 3, 0))
             println(
                 sol.numIslands(
