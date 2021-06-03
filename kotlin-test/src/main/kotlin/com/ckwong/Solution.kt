@@ -722,6 +722,8 @@ class Solution {
      *  3 4
      */
     fun searchMatrix(matrix: Array<IntArray>, target: Int): Boolean {
+        // this "solution" is so so inefficient, the ones in LeetCode is way better, in particular,
+        // this one: https://leetcode.com/problems/search-a-2d-matrix-ii/discuss/1240641/
         val width = matrix[0].size
         val height = matrix.size
         var rowStart = 0
