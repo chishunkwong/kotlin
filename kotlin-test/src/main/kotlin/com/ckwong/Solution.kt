@@ -808,12 +808,54 @@ class Solution {
         return tracker.toIntArray()
     }
 
+    /**
+     * https://leetcode.com/problems/h-index-ii/
+     */
+    fun hIndex(citations: IntArray): Int {
+        val len = citations.size
+        var start = 0
+        var end = len - 1 // inclusive
+        val atEnd = citations[end]
+        if (citations[start] >= len) return len
+        if (atEnd <= 1) return atEnd
+        // so here is the plan, like a binary search, but the target is the number of places counting from the end
+        // and including the current index. So e.g. [0, 1, 4, 5, 6], the mid is 4, which is greater than 3 (the number
+        // of places counting to the end from current position. So there are at least 3 papers with a score of 4
+        // or higher, hence hIndex is at least 3, so we move the start end to 0 and 4, until we match or went past.
+        while (end - start > 1) {
+            val mid = (start + end) / 2
+            val atMid = citations[mid]
+            when {
+                atMid > len - mid -> {
+                    end = mid
+                }
+                atMid < len - mid -> {
+                    start = mid
+                }
+                else -> {
+                    return len - mid
+                }
+            }
+        }
+        val atStart = citations[start]
+        if (atStart >= len - start) return (len - start)
+        return len - end
+    }
+
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
             val sol = Solution()
-            println(sol.singleNumber(intArrayOf(1, 2, 3, 2)).toList())
+            println(sol.hIndex(intArrayOf(0)))
+            println(sol.hIndex(intArrayOf(1)))
+            println(sol.hIndex(intArrayOf(0, 1, 3, 5, 6)))
+            println(sol.hIndex(intArrayOf(0, 1, 4, 5, 6)))
+            println(sol.hIndex(intArrayOf(1, 2, 4, 6, 7)))
+            println(sol.hIndex(intArrayOf(3, 4, 6, 8, 9)))
+            println(sol.hIndex(intArrayOf(0 ,0, 1, 1, 3, 3)))
+            println(sol.hIndex(intArrayOf(0 ,0, 1, 1, 1, 3)))
             /*
+            println(sol.singleNumber(intArrayOf(1, 2, 3, 2)).toList())
             println(
                 sol.searchMatrix(
                     arrayOf(
