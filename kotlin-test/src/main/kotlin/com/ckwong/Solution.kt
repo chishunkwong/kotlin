@@ -725,30 +725,34 @@ class Solution {
         val width = matrix[0].size
         val height = matrix.size
         var rowStart = 0
-        var rowEnd = width - 1 // inclusive
+        var rowEnd = height - 1 // inclusive
         var colStart = 0
-        var colEnd = height - 1 // ditto
+        var colEnd = width - 1 // ditto
         while (rowEnd >= rowStart && colEnd >= colStart) {
+            // println("search row $rowStart at $colStart, $colEnd")
             val atCol = binSearch(colStart, colEnd, target) { x ->
                 matrix[rowStart][x]
             }
             if (atCol.first) {
                 // found it in a particular col of row at rowStart
+                println("$rowStart, ${atCol.second}")
                 return true
             }
-            rowEnd = atCol.second
-            if (rowEnd < rowStart) return false
+            colEnd = atCol.second
+            if (colEnd < colStart) return false
+            // println("search col $colStart at $rowStart, $rowEnd")
             val atRow = binSearch(rowStart, rowEnd, target) { y ->
                 matrix[y][colStart]
             }
             if (atRow.first) {
                 // found it in a particular row of col at colStart
+                println("${atRow.second}, $colStart")
                 return true
             }
-            colEnd = atRow.second
-            if (colEnd < colStart) return false
+            rowEnd = atRow.second
+            if (rowEnd < rowStart) return false
             colStart++
-            colEnd++
+            rowStart++
         }
         return false
     }
@@ -759,14 +763,37 @@ class Solution {
      * else return false, index, where index is the value just lower than the target,
      * or -1 if target is smaller than all, and len if target is larger than all
      */
-    private fun binSearch(start: Int, end: Int, target: Int, accessor: (Int) -> Int): Pair<Boolean, Int> {
-        return Pair(true, 0)
+    private fun binSearch(startAt: Int, endAt: Int, target: Int, accessor: (Int) -> Int): Pair<Boolean, Int> {
+        // start and end are inclusive, start <= end
+        var start = startAt
+        var end = endAt
+        var atStart = accessor(start)
+        var atEnd = accessor(end)
+        if (target < atStart) return Pair(false, start - 1)
+        if (target > atEnd) return Pair(false, end)
+        while (end - start > 1) {
+            var mid = (start + end) / 2
+            val atMid = accessor(mid)
+            when {
+                target > atMid -> start = mid
+                target < atMid -> end = mid
+                else -> return Pair(true, mid)
+            }
+        }
+        atStart = accessor(start)
+        atEnd = accessor(end)
+        return when (target) {
+            atEnd -> Pair(true, end)
+            atStart -> Pair(true, start)
+            else -> Pair(false, start)
+        }
     }
 
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
             val sol = Solution()
+            // println(sol.searchMatrix(arrayOf(intArrayOf(1, 1)), 3))
             println(
                 sol.searchMatrix(
                     arrayOf(
@@ -776,7 +803,7 @@ class Solution {
                         intArrayOf(10, 13, 14, 17, 24),
                         intArrayOf(18, 21, 23, 26, 30),
                     ),
-                    5
+                    12
                 )
             )
             /*
